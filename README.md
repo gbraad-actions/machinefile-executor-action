@@ -1,4 +1,5 @@
-# Machinefile GitHub Action
+Machinefile executor GitHub Action
+==================================
 
 
 This action allows you to run Dockerfile/Containerfile commands directly on the host system without using Docker or any other container engine. It's useful for executing build commands in a predictable environment or setting up development tools.
@@ -9,8 +10,9 @@ This action allows you to run Dockerfile/Containerfile commands directly on the 
 ```yaml
 steps:
 - uses: actions/checkout@v3
+
 - name: Run Machinefile commands
-  uses: gbraad-redhat/machinefile-executor-action@v1
+  uses: gbraad-actions/machinefile-executor-action@v1
   with:
     containerfile: 'Containerfile'  # or path to your Containerfile
     context: '.'  # Build context directory
@@ -43,7 +45,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Run Dockerfile commands
-      uses: gbraad-redhat/machinefile-executor-action@v1
+      uses: gbraad-actions/machinefile-executor-action@v1
       with:
         dockerfile: 'containers/Containerfile-devtools'
         context: '.'
