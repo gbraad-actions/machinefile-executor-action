@@ -1,0 +1,41 @@
+name: "Machinefile executor"
+description: "A simple Dockerfile/Containerfile interpreter to set up the local machine"
+author: "Gerard Braad <me@gbraad.nl>"
+inputs:
+  containerfile:
+    description: 'Path to the Dockerfile/Containerfile to execute'
+    required: true
+    default: 'Containerfile'
+  context:
+    description: 'Directory to use as build context'
+    required: true
+    default: '.'
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Machinefile executor
+      id: setup
+      shell: bash
+      run: |
+        arch=$(uname -m)
+        if [[ "$arch" == "x86_64" ]]; then
+          DOWNLOAD_URL="https://github.com/gbraad-redhat/Machinefile/releases/download/0.2.0/linux-amd64.tar.gz"
+        elif [[ "$arch" == "aarch64" ]]; then
+          DOWNLOAD_URL="https://github.com/gbraad-redhat/Machinefile/releases/download/0.2.0/linux-arm64.tar.gz"
+        else
+          echo "::error::Unsupported architecture: $arch. Only x86_64 and aarch64 are supported."
+          exit 1
+        fi
+        
+        echo "Downloading Machinefile executor from $DOWNLOAD_URL"
+        mkdir -p /tmp/machinefile-executor
+        curl -sSL $DOWNLOAD_URL | tar -xz -C /tmp/machinefile-executor --strip-components=1
+        chmod +x /tmp/machinefile-executor/machinefile
+        echo "Downloaded and extracted Machinefile executor binary"
+
+    - name: Execute Containerfile commands
+      shell: bash
+      run: |
+        echo "Running Containerfile: ${{ inputs.dockerfile }}"
+        echo "Context directory: ${{ inputs.context }}"
+        sudo /tmp/machinefile-executor/machinefile "${{ inputs.containerfile }}" "${{ inputs.context }}"

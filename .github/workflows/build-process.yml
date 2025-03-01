@@ -1,0 +1,35 @@
+name: Machinefile test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+   
+    - name: Checkout Machinefile repository for test data
+      uses: actions/checkout@v3
+      with:
+        repository: gbraad-redhat/Machinefile
+        path: machinefile-test-data
+ 
+    - name: Run Machinefile commands
+      uses: ./
+      with:
+        containerfile: 'machinefile-test-data/test/Machinefile'
+        context: 'machinefile-test-data/test'
+        
+    - name: Verify execution
+      run: |
+        if [ -f /tmp/hello ]; then
+          echo "Machinefile executed successfully"
+          cat /tmp/hello
+        else
+          echo "Machinefile execution failed"
+          exit 1
+        fi
