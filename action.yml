@@ -17,11 +17,13 @@ runs:
       id: setup
       shell: bash
       run: |
+        VERSION=0.2.5
+        DOWNLOAD_BASEURL="https://github.com/gbraad-redhat/Machinefile/releases/download/${VERSION}"
         arch=$(uname -m)
         if [[ "$arch" == "x86_64" ]]; then
-          DOWNLOAD_URL="https://github.com/gbraad-redhat/Machinefile/releases/download/0.2.0/linux-amd64.tar.gz"
+          DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-amd64.tar.gz"
         elif [[ "$arch" == "aarch64" ]]; then
-          DOWNLOAD_URL="https://github.com/gbraad-redhat/Machinefile/releases/download/0.2.0/linux-arm64.tar.gz"
+          DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-arm64.tar.gz"
         else
           echo "::error::Unsupported architecture: $arch. Only x86_64 and aarch64 are supported."
           exit 1
@@ -36,6 +38,6 @@ runs:
     - name: Execute Containerfile commands
       shell: bash
       run: |
-        echo "Running Containerfile: ${{ inputs.dockerfile }}"
+        echo "Running Containerfile: ${{ inputs.containerfile }}"
         echo "Context directory: ${{ inputs.context }}"
         sudo /tmp/machinefile-executor/machinefile "${{ inputs.containerfile }}" "${{ inputs.context }}"
