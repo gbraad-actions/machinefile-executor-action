@@ -17,7 +17,7 @@ runs:
       id: setup
       shell: bash
       run: |
-        VERSION=0.2.5
+        VERSION=0.3.0
         DOWNLOAD_BASEURL="https://github.com/gbraad-redhat/Machinefile/releases/download/${VERSION}"
         arch=$(uname -m)
         if [[ "$arch" == "x86_64" ]]; then
