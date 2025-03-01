@@ -47,7 +47,7 @@ jobs:
     - name: Run Dockerfile commands
       uses: gbraad-actions/machinefile-executor-action@v1
       with:
-        dockerfile: 'containers/Containerfile-devtools'
+        containerfile: 'containers/Containerfile-devtools'
         context: '.'
         
     - name: Run build tests
