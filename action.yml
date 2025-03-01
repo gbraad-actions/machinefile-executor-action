@@ -10,6 +10,10 @@ inputs:
     description: 'Directory to use as build context'
     required: true
     default: '.'
+  arguments:
+    description: 'Additional arguments to pass to the machinefile tool (e.g., --arg=USERID=1000 --arg=HOMEBASE=/var/home)'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -40,4 +44,4 @@ runs:
       run: |
         echo "Running Containerfile: ${{ inputs.containerfile }}"
         echo "Context directory: ${{ inputs.context }}"
-        sudo /tmp/machinefile-executor/machinefile "${{ inputs.containerfile }}" "${{ inputs.context }}"
+        sudo /tmp/machinefile-executor/machinefile ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"

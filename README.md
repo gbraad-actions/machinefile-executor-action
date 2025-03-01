@@ -24,6 +24,8 @@ steps:
 |---------------|------------------------------------------|----------|----------------|
 | containerfile | Path to the Dockerfile/Containerfile     | Yes      | 'Containerfile'|
 | context       | Directory to use as build context        | Yes      | '.'            |
+| arguments     | Additional arguments to pass             | No       | ''             |
+
 
 ## Example
 
@@ -49,6 +51,7 @@ jobs:
       with:
         containerfile: 'containers/Containerfile-devtools'
         context: '.'
+        arguments: --arg=USER=gbraad
         
     - name: Run build tests
       run: |
