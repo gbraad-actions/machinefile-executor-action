@@ -14,6 +14,10 @@ inputs:
     description: 'Additional arguments to pass to the machinefile tool (e.g., --arg=USERID=1000 --arg=HOMEBASE=/var/home)'
     required: false
     default: ''
+  binarypath:
+    description: 'Path to the machinefile binary'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -23,25 +27,33 @@ runs:
       run: |
         VERSION=0.3.0
         DOWNLOAD_BASEURL="https://github.com/gbraad-redhat/Machinefile/releases/download/${VERSION}"
-        arch=$(uname -m)
-        if [[ "$arch" == "x86_64" ]]; then
-          DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-amd64.tar.gz"
-        elif [[ "$arch" == "aarch64" ]]; then
-          DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-arm64.tar.gz"
+
+        if [[ -z "${{ inputs.binarypath }}" ]]; then
+          arch=$(uname -m)
+          if [[ "$arch" == "x86_64" ]]; then
+            DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-amd64.tar.gz"
+          elif [[ "$arch" == "aarch64" ]]; then
+            DOWNLOAD_URL="${DOWNLOAD_BASEURL}/linux-arm64.tar.gz"
+          else
+            echo "::error::Unsupported architecture: $arch. Only x86_64 and aarch64 are supported."
+            exit 1
+          fi
+
+          echo "Downloading Machinefile executor from $DOWNLOAD_URL"
+          mkdir -p /tmp/machinefile-executor
+          curl -sSL $DOWNLOAD_URL | tar -xz -C /tmp/machinefile-executor --strip-components=1
+          chmod +x /tmp/machinefile-executor/machinefile
+          BINARY_PATH="/tmp/machinefile-executor/machinefile"
+          echo "Downloaded and extracted Machinefile executor binary"
         else
-          echo "::error::Unsupported architecture: $arch. Only x86_64 and aarch64 are supported."
-          exit 1
+          BINARY_PATH="${{ inputs.binarypath }}"
+          echo "Using specified binary path: $BINARY_PATH"
         fi
-        
-        echo "Downloading Machinefile executor from $DOWNLOAD_URL"
-        mkdir -p /tmp/machinefile-executor
-        curl -sSL $DOWNLOAD_URL | tar -xz -C /tmp/machinefile-executor --strip-components=1
-        chmod +x /tmp/machinefile-executor/machinefile
-        echo "Downloaded and extracted Machinefile executor binary"
 
     - name: Execute Containerfile commands
       shell: bash
       run: |
         echo "Running Containerfile: ${{ inputs.containerfile }}"
         echo "Context directory: ${{ inputs.context }}"
-        sudo /tmp/machinefile-executor/machinefile ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"
+        sudo $BINARY_PATH ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"
+
