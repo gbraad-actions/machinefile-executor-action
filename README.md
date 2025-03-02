@@ -13,7 +13,7 @@ steps:
 - uses: actions/checkout@v3
 
 - name: Run Machinefile commands
-  uses: gbraad-actions/machinefile-executor-action@v1
+  uses: gbraad-actions/machinefile-executor-action@v3
   with:
     containerfile: 'Containerfile'  # or path to your Containerfile
     context: '.'  # Build context directory
@@ -51,7 +51,7 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Run Dockerfile commands
-      uses: gbraad-actions/machinefile-executor-action@v1
+      uses: gbraad-actions/machinefile-executor-action@v3
       with:
         containerfile: 'containers/Containerfile-devtools'
         context: '.'
