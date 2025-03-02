@@ -50,10 +50,12 @@ runs:
           echo "Using specified binary path: $BINARY_PATH"
         fi
 
+        echo "MACHINEFILE=$BINARY_PATH" >> $GITHUB_ENV
+
     - name: Execute Containerfile commands
       shell: bash
       run: |
         echo "Running Containerfile: ${{ inputs.containerfile }}"
         echo "Context directory: ${{ inputs.context }}"
-        sudo $BINARY_PATH ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"
+        sudo $MACHINEFILE ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"
 
