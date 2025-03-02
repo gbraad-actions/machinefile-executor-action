@@ -19,6 +19,7 @@ steps:
     context: '.'  # Build context directory
 ```
 
+
 ## Inputs
 
 | Input         | Description                              | Required | Default        |
@@ -26,6 +27,8 @@ steps:
 | containerfile | Path to the Dockerfile/Containerfile     | Yes      | 'Containerfile'|
 | context       | Directory to use as build context        | Yes      | '.'            |
 | arguments     | Additional arguments to pass             | No       | ''             |
+| binarypath    | Override the path of executor to use     | No       | ''             |
+| version       | Version of executor binary to download   | No       | '0.5.0'        |
 
 
 ## Example
