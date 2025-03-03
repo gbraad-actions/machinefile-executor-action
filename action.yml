@@ -2,6 +2,10 @@ name: "Machinefile executor"
 description: "A simple Dockerfile/Containerfile interpreter to set up the local machine"
 author: "Gerard Braad <me@gbraad.nl>"
 inputs:
+  version:
+    description: 'Version of machinefile to download'
+    required: false
+    default: '0.8.5'
   containerfile:
     description: 'Path to the Dockerfile/Containerfile to execute'
     required: true
@@ -10,14 +14,40 @@ inputs:
     description: 'Directory to use as build context'
     required: true
     default: '.'
+  runner:
+    description: 'Runner to use (local, podman, or ssh)'
+    required: false
+    default: 'local'
+  podman-name:
+    description: 'Name of the Podman container when using podman runner'
+    required: false
+  podman-connection:
+    description: 'Podman connection name'
+    required: false
+  podman-binary:
+    description: 'Path to Podman binary'
+    required: false
+    default: 'podman'
+  ssh-host:
+    description: 'SSH host for remote execution'
+    required: false
+  ssh-user:
+    description: 'SSH user for remote execution'
+    required: false
+  ssh-key:
+    description: 'Path to SSH private key'
+    required: false
+  ssh-password:
+    description: 'SSH password (not recommended, use secrets)'
+    required: false
   arguments:
-    description: 'Additional arguments to pass to the machinefile tool (e.g., --arg=USERID=1000 --arg=HOMEBASE=/var/home)'
+    description: 'Additional arguments to pass to the machinefile tool (e.g., --arg=USER=gbraad --arg=GROUP=wheel)'
     required: false
     default: ''
-  version:
-    description: 'Version to download'
+  args:
+    description: 'Build arguments (ARG) in KEY=VALUE format (new style, each on new line)'
     required: false
-    default: '0.5.0'
+    default: ''
   binarypath:
     description: 'Path to the machinefile binary'
     required: false
@@ -59,7 +89,63 @@ runs:
     - name: Execute Containerfile commands
       shell: bash
       run: |
+        ARGS=""
+
+        # Handle runner selection
+        case "${{ inputs.runner }}" in
+          "podman")
+            ARGS="$ARGS -p"
+            if [[ -n "${{ inputs.podman-name }}" ]]; then
+              ARGS="$ARGS -n ${{ inputs.podman-name }}"
+            fi
+            if [[ -n "${{ inputs.podman-connection }}" ]]; then
+              ARGS="$ARGS --connection ${{ inputs.podman-connection }}"
+            fi
+            if [[ -n "${{ inputs.podman-binary }}" ]]; then
+              ARGS="$ARGS --podman-binary ${{ inputs.podman-binary }}"
+            fi
+            ;;
+          "ssh")
+            ARGS="$ARGS -s"
+            if [[ -n "${{ inputs.ssh-host }}" ]]; then
+              ARGS="$ARGS -H ${{ inputs.ssh-host }}"
+            fi
+            if [[ -n "${{ inputs.ssh-user }}" ]]; then
+              ARGS="$ARGS -u ${{ inputs.ssh-user }}"
+            fi
+            if [[ -n "${{ inputs.ssh-key }}" ]]; then
+              ARGS="$ARGS --key ${{ inputs.ssh-key }}"
+            fi
+            if [[ -n "${{ inputs.ssh-password }}" ]]; then
+              ARGS="$ARGS --password ${{ inputs.ssh-password }}"
+            fi
+            ;;
+          "local"|"")
+            ARGS="$ARGS -l"
+            ;;
+          *)
+            echo "::error::Invalid runner type: ${{ inputs.runner }}. Must be one of: local, podman, ssh"
+            exit 1
+            ;;
+        esac
+
+        # Handle both old-style arguments and new-style args
+        if [[ -n "${{ inputs.arguments }}" ]]; then
+          ARGS="$ARGS ${{ inputs.arguments }}"
+        fi
+
+        # Add any build arguments
+        if [[ -n "${{ inputs.args }}" ]]; then
+          # Split args on newlines and spaces
+          echo "${{ inputs.args }}" | while read -r arg || [[ -n "$arg" ]]; do
+            if [[ -n "$arg" ]]; then
+              ARGS="$ARGS --arg $arg"
+            fi
+          done
+        fi
+
         echo "Running Containerfile: ${{ inputs.containerfile }}"
         echo "Context directory: ${{ inputs.context }}"
-        sudo $MACHINEFILE ${{ inputs.arguments }} "${{ inputs.containerfile }}" "${{ inputs.context }}"
-
+        echo "Arguments: $ARGS"
+        
+        sudo $MACHINEFILE $ARGS "${{ inputs.containerfile }}" "${{ inputs.context }}"

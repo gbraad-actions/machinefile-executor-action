@@ -64,6 +64,48 @@ jobs:
 ```
 
 
+### Local runner
+
+```yaml
+- name: Setup with local runner
+  uses: gbraad-actions/machinefile-executor-action@main
+  with:
+    containerfile: Containerfile
+    context: .
+    runner: local
+```
+
+### Podman runner
+
+```yaml
+- name: Setup with Podman runner
+  uses: gbraad-actions/machinefile-executor-action@main
+  with:
+    containerfile: Containerfile
+    context: .
+    runner: podman
+    podman-name: my-container
+    podman-connection: my-connection
+```
+
+### SSH runner
+
+```yaml
+- name: Setup with SSH runner
+  uses: gbraad-actions/machinefile-executor-action@main
+  with:
+    containerfile: Containerfile
+    context: .
+    runner: ssh
+    ssh-host: example.com
+    ssh-user: user
+    ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    args: |
+      USER=gbraad
+      GROUP=wheel
+```
+
+
 ## License
 
 [MIT License](LICENSE)
