@@ -5,7 +5,7 @@ inputs:
   version:
     description: 'Version of machinefile to download'
     required: false
-    default: '0.8.7'
+    default: '0.9.0'
   containerfile:
     description: 'Path to the Dockerfile/Containerfile to execute'
     required: true
@@ -75,7 +75,7 @@ runs:
 
           echo "Downloading Machinefile executor from $DOWNLOAD_URL"
           mkdir -p /tmp/machinefile-executor
-          curl -sSL $DOWNLOAD_URL | tar -xz -C /tmp/machinefile-executor --strip-components=1
+          curl -sSL $DOWNLOAD_URL | tar -xz -C /tmp/machinefile-executor
           chmod +x /tmp/machinefile-executor/machinefile
           BINARY_PATH="/tmp/machinefile-executor/machinefile"
           echo "Downloaded and extracted Machinefile executor binary"
@@ -149,3 +149,4 @@ runs:
         echo "Arguments: $ARGS"
         
         sudo $MACHINEFILE $ARGS "${{ inputs.containerfile }}" "${{ inputs.context }}"
+
